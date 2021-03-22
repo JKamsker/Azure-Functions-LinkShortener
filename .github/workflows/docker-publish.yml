@@ -24,6 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set root directory
+        run: cd LinkShortener
+
       - name: Build image
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
