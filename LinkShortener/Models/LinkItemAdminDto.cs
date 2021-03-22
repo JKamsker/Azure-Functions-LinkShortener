@@ -20,7 +20,7 @@
 
         public LinkItemAdminDto SetHost(string host)
         {
-            ShortenedLink = $"{host}/api/Shortener/{Id}";
+            ShortenedLink = $"{host}/{Id}";
             return this;
         }
     }

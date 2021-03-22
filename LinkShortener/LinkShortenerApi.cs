@@ -26,14 +26,13 @@ namespace LinkShortener
     ///     1: Link-Ersteller bekommt einen Token, um seinen link zu bearbeiten
     /// </summary>
 
-    public class Function1
+    public class LinkShortenerApi
     {
-        private const string Prefix = "Shortener/";
 
         private readonly CosmosDbContext _context;
         private readonly IMapper _mapper;
 
-        public Function1(CosmosDbContext context, IMapper mapper)
+        public LinkShortenerApi(CosmosDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -45,39 +44,23 @@ namespace LinkShortener
             await _context.InitializeAsync();
         }
 
-        [FunctionName("ListAll")]
-        public async Task<IActionResult> GetAllLinks
-        (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "list")] HttpRequest req
-        )
-        {
-            var linkItem = await _context.ShortenerContainer
-                .AsQueryable<LinkItem>()
-                .Select(x => new { x.Id, x.Url })
-                .ToCosmosAsyncEnumerable()
-                .Select(x => new { shortenedLink = $"{req.GetHostPath()}/api/Shortener/{x.Id}", x.Url })
-                .ToListAsync();
-
-            return new OkObjectResult(linkItem);
-        }
-
         [FunctionName("Link")]
         public async Task<IActionResult> Relay
         (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = (Prefix + "{id}"))] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "{id}")] HttpRequest req,
             [Bind("id")] string id,
             ILogger log
         )
         {
             var linkItem = await _context.ShortenerContainer
-                    .AsQueryable<LinkItem>()
-                    .Where(x => x.Id == id)
-                    .ToCosmosAsyncEnumerable()
-                    .FirstOrDefaultAsync();
+                .AsQueryable<LinkItem>()
+                .Where(x => x.Id == id)
+                .ToCosmosAsyncEnumerable()
+                .FirstOrDefaultAsync();
 
             if (linkItem != null)
             {
-                return new RedirectResult(linkItem.Url);
+                return new RedirectResult(linkItem.Url, false);
             }
 
             return new NotFoundObjectResult(new
@@ -87,10 +70,26 @@ namespace LinkShortener
             });
         }
 
+        [FunctionName("ListAll")]
+        public async Task<IActionResult> GetAllLinks
+        (
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "api/list")] HttpRequest req
+        )
+        {
+            var linkItem = await _context.ShortenerContainer
+                .AsQueryable<LinkItem>()
+                .Select(x => new { x.Id, x.Url })
+                .ToCosmosAsyncEnumerable()
+                .Select(x => new { shortenedLink = $"{req.GetHostPath()}/{x.Id}", x.Url })
+                .ToListAsync();
+
+            return new OkObjectResult(linkItem);
+        }
+
         [FunctionName("Create")]
         public async Task<IActionResult> CreateLink
         (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Prefix)] LinkItemCreationDto creationDto,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "api/Shortener")] LinkItemCreationDto creationDto,
             HttpRequest req
         )
         {
@@ -106,9 +105,10 @@ namespace LinkShortener
         }
 
         [FunctionName("Update")]
+        //[Route()]
         public async Task<IActionResult> UpdateLink
         (
-            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Prefix + "{id}")] LinkItemUpdateDto updateDto,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "api/Shortener/{id}")] LinkItemUpdateDto updateDto,
             [Bind("id")] string id,
             HttpRequest req
 
@@ -146,7 +146,6 @@ namespace LinkShortener
                     Message = "AccessKey was incorrect",
                 });
             }
-
 
             linkItem.Url = updateDto.Url;
             await _context.ShortenerContainer.UpsertItemAsync(linkItem);
