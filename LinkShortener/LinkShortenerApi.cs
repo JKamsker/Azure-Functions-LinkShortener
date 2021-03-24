@@ -117,7 +117,11 @@ namespace LinkShortener
             var result = _mapper.Map<LinkItemAdminDto>(itemResponse.Resource)
                 .SetHost(req.GetHostPath());
 
-            return new OkObjectResult(result);
+            return new ObjectResult(new
+            {
+                Success = true,
+                Data = result
+            });
         }
 
         [FunctionName("Update")]
