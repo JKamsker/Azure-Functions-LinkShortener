@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using LinkShortener.Extensions;
 using LinkShortener.Models;
 using LinkShortener.Models.Settings;
+
 using Microsoft.Azure.Cosmos;
 
 namespace LinkShortener
@@ -47,18 +49,17 @@ namespace LinkShortener
                 var database = databaseResponse.Database;
 
                 await database.CreateContainerIfNotExistsAsync("LinkShortener", "/Id");
-                
+
                 var adminContainerResponse = await database.CreateContainerIfNotExistsAsync("Admins", "/AdminKey");
                 var adminContainer = adminContainerResponse.Container;
                 if (!await adminContainer.AsQueryable<AdminItem>().ToCosmosAsyncEnumerable().AnyAsync())
                 {
                     await adminContainer.CreateItemAsync(new AdminItem
                     {
-                         AdminKey = string.IsNullOrEmpty(_adminSettings?.AdminKey) ? "123456" : _adminSettings.AdminKey
+                        AdminKey = string.IsNullOrEmpty(_adminSettings?.AdminKey) ? "123456" : _adminSettings.AdminKey
                     });
                 }
-                
-                
+
                 _initialized = true;
             }
             finally

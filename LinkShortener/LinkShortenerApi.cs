@@ -28,7 +28,6 @@ namespace LinkShortener
 
     public class LinkShortenerApi
     {
-
         private readonly CosmosDbContext _context;
         private readonly IMapper _mapper;
 
@@ -96,6 +95,23 @@ namespace LinkShortener
             creationDto.Id = !string.IsNullOrEmpty(creationDto.Id) ? creationDto.Id : RandomEx.RandomString(10);
             creationDto.AccessKey = !string.IsNullOrEmpty(creationDto.AccessKey) ? creationDto.AccessKey : RandomEx.RandomString(10);
 
+            if (!string.IsNullOrEmpty(creationDto.Id))
+            {
+                var idExists = await _context.ShortenerContainer
+                    .AsQueryable<LinkItem>()
+                    .Where(x => x.Id == creationDto.Id)
+                    .ToCosmosAsyncEnumerable()
+                    .AnyAsync();
+                if (idExists)
+                {
+                    return new BadRequestObjectResult(new
+                    {
+                        Success = false,
+                        Message = "Id already exists"
+                    });
+                }
+            }
+
             var itemResponse = await _context.ShortenerContainer.CreateItemAsync(_mapper.Map<LinkItem>(creationDto));
 
             var result = _mapper.Map<LinkItemAdminDto>(itemResponse.Resource)
@@ -150,7 +166,11 @@ namespace LinkShortener
             linkItem.Url = updateDto.Url;
             await _context.ShortenerContainer.UpsertItemAsync(linkItem);
             var result = _mapper.Map<LinkItemAdminDto>(linkItem).SetHost(req.GetHostPath());
-            return new ObjectResult(result);
+            return new ObjectResult(new
+            {
+                Success = true,
+                Data = result
+            });
         }
 
         private async Task<bool> IsAdminKeyAsync(string accessKey)

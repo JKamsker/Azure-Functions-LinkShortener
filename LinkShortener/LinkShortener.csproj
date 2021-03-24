@@ -1,12 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
+    <UserSecretsId>acb3b188-fa79-4fc8-8d24-f0d5898d3026</UserSecretsId>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="C:\Users\Weirdo\.nuget\packages\microsoft.azure.cosmos\3.17.1\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.17.1" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.11" />
