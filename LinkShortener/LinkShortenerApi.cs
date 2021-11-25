@@ -79,9 +79,8 @@ namespace LinkShortener
                 .AsQueryable<LinkItem>()
                 .Select(x => new { x.Id, x.Url })
                 .ToCosmosAsyncEnumerable()
-                .Select(x => new { shortenedLink = $"{req.GetHostPath()}/{x.Id}", x.Url })
+                .Select(x => new { x.Id, shortenedLink = $"{req.GetHostPath()}/{x.Id}", x.Url })
                 .ToListAsync();
-
 
             return new OkObjectResult(linkItem);
         }
@@ -126,7 +125,6 @@ namespace LinkShortener
         }
 
         [FunctionName("Update")]
-        //[Route()]
         public async Task<IActionResult> UpdateLink
         (
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "api/Shortener/{id}")] LinkItemUpdateDto updateDto,
