@@ -82,6 +82,7 @@ namespace LinkShortener
                 .Select(x => new { shortenedLink = $"{req.GetHostPath()}/{x.Id}", x.Url })
                 .ToListAsync();
 
+
             return new OkObjectResult(linkItem);
         }
 
