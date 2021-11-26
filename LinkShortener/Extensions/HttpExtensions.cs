@@ -8,9 +8,10 @@ namespace LinkShortener.Extensions
 {
     public static class HttpExtensions
     {
-        public static string GetHostPath(this HttpRequest req)
+        public static string GetHostPath(this HttpRequest req, bool forceHttps = true)
         {
-            return $"{req.Scheme}://{req.Host}";
+            var scheme = forceHttps ? "https" : req.Scheme;
+            return $"{scheme}://{req.Host}";
         }
     }
 }
